@@ -1,9 +1,10 @@
 ﻿# MyLifeHistory - Collection Scheduler 설치 (Windows Task Scheduler)
 #
-# 하루 2회(08:00, 18:00) 01_RAW의 신규 Source 개수만 확인하는 읽기 전용
-# Collection Task를 등록한다. Daily Finalize 실행, Gemini/API 호출,
-# Processing State 변경, 실패 시 자동 재시도 - 모두 하지 않는다
-# (scripts/run-collection-check.mjs 참고).
+# 하루 2회(08:00, 18:00) 00_INBOX에 새로 들어온 .md/.txt 파일을 01_RAW로
+# 옮기는 실제 Collection Task를 등록한다(scripts/run-collection.mjs).
+# 이미 01_RAW에 동일 파일명이 있으면 덮어쓰지 않고 건너뛴다(사람 확인
+# 필요). Daily Finalize 실행, Gemini/API 호출, Processing State 변경,
+# 실패 시 자동 재시도 - 모두 하지 않는다.
 #
 # 이 스크립트는 "등록"만 한다 - 실제 Task Scheduler 등록은 사용자가 이
 # 스크립트를 직접 실행해야 이루어진다.
@@ -17,9 +18,9 @@ $OutputEncoding = [System.Text.Encoding]::UTF8
 
 $taskName = 'MyLifeHistory Collection'
 $projectRoot = Split-Path -Parent $PSScriptRoot
-$scriptPath = Join-Path $projectRoot 'scripts\run-collection-check.mjs'
+$scriptPath = Join-Path $projectRoot 'scripts\run-collection.mjs'
 $logDir = Join-Path $env:LOCALAPPDATA 'MyLifeHistory'
-$logPath = Join-Path $logDir 'collection-check.log'
+$logPath = Join-Path $logDir 'collection.log'
 
 $existing = Get-ScheduledTask -TaskName $taskName -ErrorAction SilentlyContinue
 if ($existing) {
@@ -48,11 +49,12 @@ $trigger08 = New-ScheduledTaskTrigger -Daily -At '08:00'
 $trigger18 = New-ScheduledTaskTrigger -Daily -At '18:00'
 
 $principal = New-ScheduledTaskPrincipal -UserId $env:USERNAME -LogonType Interactive
-$settings = New-ScheduledTaskSettingsSet -RestartCount 0 -AllowStartIfOnBatteries -DontStopIfGoingOnBatteries
+$settings = New-ScheduledTaskSettingsSet -RestartCount 0 -MultipleInstances IgnoreNew `
+    -AllowStartIfOnBatteries -DontStopIfGoingOnBatteries
 
 Register-ScheduledTask -TaskName $taskName -Action $action -Trigger @($trigger08, $trigger18) `
     -Principal $principal -Settings $settings `
-    -Description 'MyLifeHistory: 01_RAW 신규 기록 개수 확인 (읽기 전용, API 호출/Finalize/State 변경 없음)' | Out-Null
+    -Description 'MyLifeHistory: 00_INBOX -> 01_RAW 신규 파일 이동 (덮어쓰기 없음, API 호출/Finalize/State 변경 없음)' | Out-Null
 
 Write-Host "등록됨: $taskName (매일 08:00, 18:00)"
 Write-Host "로그 위치: $logPath"

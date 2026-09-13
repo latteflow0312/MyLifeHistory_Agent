@@ -995,3 +995,20 @@ Status: COMPLETE / FROZEN
 - Gemini: `IMPLEMENTED / LIVE VERIFIED — PASS` — Free Tier 기준 실제 1회 Live Smoke Test를 수행했다(API Call Count 1, Result type string, PASS). 세션 종료 후 Credential은 제거되었다.
 - Provider Independence: `VERIFIED` — Fake, OpenAI, Gemini Adapter 모두 동일한 `execute(promptPackage) => Promise<string>` Contract를 만족하며, Provider-specific 로직은 각 Adapter 파일 내부로만 격리되어 있다.
 - Production Pipeline Integration: `NOT PERFORMED BY DESIGN` — Real Adapter를 Production Pipeline에 실제로 연결하는 작업은 Phase 9 범위에 포함하지 않았다. 이는 결함이 아니라 의도된 종료 조건이며, 연결은 향후 별도 Phase에서 다룬다.
+
+
+## 38. Collection 운영 규칙 (00_INBOX → 01_RAW)
+
+Phase 12, Human Approved 2026-09-14. 다음을 Collection의 공식 최소 규칙으로 확정한다.
+
+- `00_INBOX` = 새로 유입된, 아직 정리되지 않은 Source가 임시로 모이는 곳이다.
+- `01_RAW` = Daily 생성의 근거가 되는, 정리된 보존 원본이다.
+- Collection은 `00_INBOX`에 있는 대상 파일을 `01_RAW`로 옮기는 것이다.
+- 대상 확장자는 `.md`, `.txt`로 한정한다.
+- 이동 과정에서 파일 내용을 변경하지 않는다.
+- 이동하려는 파일과 동일한 filename이 `01_RAW`에 이미 있으면 overwrite하지 않고 skip하며, 원본은 `00_INBOX`에 그대로 유지한다.
+- Collection은 Gemini 등 AI Provider를 호출하지 않는다.
+- Collection은 Daily Finalization을 실행하지 않는다.
+- Collection은 Processing State를 변경하지 않는다.
+- Collection 실패 시 자동 Retry를 수행하지 않는다.
+- Collection 실행 시각은 매일 08:00, 18:00이다.
