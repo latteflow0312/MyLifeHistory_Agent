@@ -1,0 +1,14 @@
+{
+  "name": "mylifehistory-agent",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "MyLifeHistory_Agent Core (Constitution v0.1.1, Phase 1 - Foundation)",
+  "scripts": {
+    "test": "node --test"
+  },
+  "dependencies": {
+    "@google/genai": "^2.22.0",
+    "openai": "^7.15.0"
+  }
+}

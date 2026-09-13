@@ -1,0 +1,26 @@
+# Credential / Secret files - never commit real secrets (Constitution Section 36)
+.env
+.env.*
+!.env.example
+*.cred
+*.key
+*.pem
+
+# Dependencies
+node_modules/
+
+# Logs and temporary files
+*.log
+temp/
+tmp/
+*.tmp
+
+# OS / Editor local files
+Thumbs.db
+.DS_Store
+.idea/
+
+# Real Credential storage (%LOCALAPPDATA%\MyLifeHistory\) and real
+# personal data (G:\내 드라이브\MY_LIFE_HISTORY) live entirely outside
+# this project folder and are never expected to appear here - listed
+# for documentation, not because anything currently matches them.
